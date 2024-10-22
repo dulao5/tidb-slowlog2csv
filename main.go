@@ -94,6 +94,8 @@ func main() {
 	writer.Write(headers)
 
 	scanner := bufio.NewScanner(logFile)
+	buf := make([]byte, bufio.MaxScanTokenSize)
+	scanner.Buffer(buf, 100*bufio.MaxScanTokenSize)
 	var record LogRecord
 
 	// first line
