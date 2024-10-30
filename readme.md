@@ -16,7 +16,7 @@ brew install duckdb
 * step 3: analysis and insights
 
 ## Analysis and insights QueryTime data via duckdb
-"QueryTime", "ParseTime", "CompileTime", "RewriteTime", "OptimizeTime", "WaitTS", "CopTime", "ProcessTime", "WaitTime"
+> target columns: "QueryTime", "ParseTime", "CompileTime", "RewriteTime", "OptimizeTime", "WaitTS", "CopTime", "ProcessTime", "WaitTime"
 ```SQL
 CREATE TABLE slowlog AS SELECT * FROM read_csv("/pathto/slowlog.csv", max_line_size=400971520, auto_detect=true);
 SELECT
