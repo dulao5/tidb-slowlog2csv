@@ -70,16 +70,16 @@ type LogRecord struct {
 }
 
 func main() {
-	// 打开日志文件
-	logFile, err := os.Open("slow_log_file.log")
+	// open log file by argv[1]
+	logFile, err := os.Open(os.Args[1])
 	if err != nil {
 		fmt.Println("Error opening log file:", err)
 		return
 	}
 	defer logFile.Close()
 
-	// 创建CSV文件
-	csvFile, err := os.Create("slow_log_with_results.csv")
+	// make csv file name by slowlog file name
+	csvFile, err := os.Create(strings.TrimSuffix(os.Args[1], ".log") + ".csv")
 	if err != nil {
 		fmt.Println("Error creating CSV file:", err)
 		return
@@ -89,8 +89,25 @@ func main() {
 	writer := csv.NewWriter(csvFile)
 	defer writer.Flush()
 
-	// 写入CSV表头
-	headers := []string{"LogTime", "Hostname", "Tidb", "Db", "TxnStartTs", "ConnID", "QueryTime", "ParseTime", "CompileTime", "RewriteTime", "OptimizeTime", "WaitTS", "CopTime", "ProcessTime", "WaitTime", "RequestCount", "ProcessKeys", "TotalKeys", "GetSnapshotTime", "RocksdbDeleteSkippedCount", "RocksdbKeySkippedCount", "RocksdbBlockCacheHitCount", "DbName", "IsInternal", "Digest", "Stats", "NumCopTasks", "CopProcAvg", "CopProcP90", "CopProcMax", "CopProcAddr", "CopWaitAvg", "CopWaitP90", "CopWaitMax", "CopWaitAddr", "MemMax", "Prepared", "PlanFromCache", "PlanFromBinding", "HasMoreResults", "KvTotal", "PdTotal", "BackoffTotal", "WriteSqlResponseTotal", "ResultRows", "Succ", "IsExplicitTxn", "IsSyncStatsFailed", "PlanDigest", "Sql", "Plan", "RpcNum", "RpcTime", "ResultOneLine"}
+	// wirite cvs first line(head line)
+	headers := []string{
+		"LogTime", "Hostname", "Tidb", "Db", "TxnStartTs", "ConnID",
+		"QueryTime", "ParseTime", "CompileTime", "RewriteTime", "OptimizeTime", "WaitTS", "CopTime", "ProcessTime", "WaitTime", // analyze fields
+		"RequestCount", "ProcessKeys", "TotalKeys", "GetSnapshotTime", "RocksdbDeleteSkippedCount", "RocksdbKeySkippedCount", "RocksdbBlockCacheHitCount", // analyze fields
+		"DbName",
+		"IsInternal", // analyze fields
+		"Digest", "Stats",
+		"NumCopTasks", // analyze fields
+		"CopProcAvg", "CopProcP90", "CopProcMax", "CopProcAddr", "CopWaitAvg", "CopWaitP90", "CopWaitMax", "CopWaitAddr",
+		"MemMax", // analyze fields
+		"Prepared", "PlanFromCache", "PlanFromBinding", "HasMoreResults",
+		"KvTotal", "PdTotal", "BackoffTotal", "WriteSqlResponseTotal",
+		"ResultRows", // analyze fields
+		// warnings
+		"Succ", // analyze fields
+		"IsExplicitTxn", "IsSyncStatsFailed",
+		"PlanDigest", "Sql", "Plan", "RpcNum", "RpcTime", "ResultOneLine",
+	}
 	writer.Write(headers)
 
 	scanner := bufio.NewScanner(logFile)
@@ -135,7 +152,6 @@ func main() {
 				writeRecord(writer, record)
 			}
 
-			// 初始化变量
 			record = LogRecord{}
 
 			if matches[1] != "" {
@@ -310,7 +326,7 @@ func main() {
 
 }
 
-// writeRecord 写入记录到 CSV
+// writeRecord wirte record to CSV
 func writeRecord(writer *csv.Writer, record LogRecord) {
 	writer.Write([]string{
 		record.LogTime,
@@ -370,7 +386,7 @@ func writeRecord(writer *csv.Writer, record LogRecord) {
 	})
 }
 
-// executeSQL 执行给定的 SQL 查询并返回结果拼接成的一行字符串
+// executeSQL execute given SQL query and return result as one line string
 func executeSQL(query string) string {
 	dsn := "root:@tcp(127.0.0.1:4000)/"
 	db, err := sql.Open("mysql", dsn)
