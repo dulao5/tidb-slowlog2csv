@@ -65,15 +65,18 @@ CREATE TABLE top_slowlog_statements AS SELECT digest,sql,count(*),sum(NumCopTask
 COPY top_slowlog_statements TO '/pathto/top-TotalKeys-slowlog-statements.csv' ;
 ```
 
-## Exporting the top-10 statements by MVCC_Vercions via duckdb
+## Exporting the top-10 statements by MVCC_Versions via duckdb
 (If TotalKeys is much larger than ProcessKeys, you may be able to use the in-memory-engine)
 ```SQL
 CREATE TABLE slowlog AS SELECT * FROM read_csv("/pathto/slowlog.csv", max_line_size=400971520, auto_detect=true, types = {'NumCopTasks': 'INTEGER', 'TotalKeys': 'INTEGER', 'ProcessKeys': 'INTEGER'});
-CREATE TABLE top_slowlog_statements AS SELECT digest,sql,count(*),sum(TotalKeys-ProcessKeys) as MVCC_Vercions,sum(TotalKeys),sum(ProcessKeys),sum(NumCopTasks),sum(QueryTime),any_value(plan)  FROM slowlog GROUP BY digest,sql ORDER BY 4 DESC LIMIT 10;
-COPY top_slowlog_statements TO '/pathto/top-TotalKeys-slowlog-statements.csv' ;
+CREATE TABLE top_slowlog_statements AS SELECT digest,sql,count(*),sum(TotalKeys-ProcessKeys) as MVCC_Versions,sum(TotalKeys),sum(ProcessKeys),sum(NumCopTasks),sum(QueryTime),any_value(plan)  FROM slowlog GROUP BY digest,sql ORDER BY 4 DESC LIMIT 10;
+COPY top_slowlog_statements TO '/pathto/top-MVCCVersions-slowlog-statements.csv' ;
 ```
 
 ## Deeper analysis and insights execution plan data via duckdb
+This script is suitable for the Poc phase of the full analysis of the scenario.
+It is recommended to set [tidb_slow_log_threshold](https://docs.pingcap.com/tidb/dev/tidb-configuration-file#tidb_slow_log_threshold) to 0 in order to get all the query slowlog, and then analyze various table access methods, review the design of primary keys and indexes by this script.
+
 ```SQL
 CREATE TABLE slowlog AS SELECT * FROM read_csv("./tidb-slow-with-results.csv", auto_detect=true, max_line_size=400971520);
 
