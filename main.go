@@ -12,6 +12,8 @@ import (
 	_ "github.com/go-sql-driver/mysql"
 )
 
+var db *sql.DB
+
 type LogRecord struct {
 	LogTime                   string
 	Hostname                  string
@@ -70,6 +72,13 @@ type LogRecord struct {
 }
 
 func main() {
+	if d, err := sql.Open("mysql", "root:@tcp(127.0.0.1:4000)/"); err != nil {
+		fmt.Println("Warning: could not open DB connection, Plan decoding disabled:", err)
+	} else {
+		db = d
+		defer db.Close()
+	}
+
 	// open log file by argv[1]
 	logFile, err := os.Open(os.Args[1])
 	if err != nil {
@@ -388,13 +397,9 @@ func writeRecord(writer *csv.Writer, record LogRecord) {
 
 // executeSQL execute given SQL query and return result as one line string
 func executeSQL(query string) string {
-	dsn := "root:@tcp(127.0.0.1:4000)/"
-	db, err := sql.Open("mysql", dsn)
-	if err != nil {
-		fmt.Println("Error connecting to the database:", err)
+	if db == nil {
 		return ""
 	}
-	defer db.Close()
 
 	rows, err := db.Query(query)
 	if err != nil {
