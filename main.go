@@ -318,7 +318,12 @@ func main() {
 				// we can ignore it here
 				// https://github.com/pingcap/tidb/blob/e41a47cab6cf99d869a4250695dd09351ba5658c/pkg/executor/slow_query.go#L638-L644
 				continue
-			} else {
+			} else if record.Sql == "" {
+				// The log file may be a merge of multiple split files where
+				// the split was non-atomic, producing out-of-order fragments
+				// without a # Time: header. Such fragments can contain extra
+				// SQL lines that appear after the real SQL of this record.
+				// Only capture the first SQL seen; ignore subsequent ones.
 				record.Sql = line
 			}
 
