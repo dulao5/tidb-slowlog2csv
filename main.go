@@ -137,10 +137,10 @@ func main() {
 	reCopProcMax := regexp.MustCompile(`Cop_proc_max: ([^ ]+)`)
 	reCopProcAddr := regexp.MustCompile(`Cop_proc_addr: ([^ ]+)`)
 
-	reCopWaitAvg := regexp.MustCompile(`Cop_proc_avg: ([^ ]+)`)
-	reCopWaitP90 := regexp.MustCompile(`Cop_proc_p90: ([^ ]+)`)
-	reCopWaitMax := regexp.MustCompile(`Cop_proc_max: ([^ ]+)`)
-	reCopWaitAddr := regexp.MustCompile(`Cop_proc_addr: ([^ ]+)`)
+	reCopWaitAvg := regexp.MustCompile(`Cop_wait_avg: ([^ ]+)`)
+	reCopWaitP90 := regexp.MustCompile(`Cop_wait_p90: ([^ ]+)`)
+	reCopWaitMax := regexp.MustCompile(`Cop_wait_max: ([^ ]+)`)
+	reCopWaitAddr := regexp.MustCompile(`Cop_wait_addr: ([^ ]+)`)
 
 	rePlan := regexp.MustCompile(`^# Plan: tidb_decode_plan\(['"](.*)['"]\)`)
 
